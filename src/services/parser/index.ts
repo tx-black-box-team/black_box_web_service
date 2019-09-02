@@ -1,13 +1,17 @@
 import Service from '..'
 
-export class ParserService extends Service {
-  constructor (path: string = 'https://jsonplaceholder.typicode.com') {
+interface ParserBase<T> {
+  parse(url: string): Promise<T>
+}
+
+export class ParserService extends Service implements ParserBase<any> {
+  constructor (path: string = 'http://bang.tx3.163.com/bang') {
     super(path)
   }
 
-  public ping() {
+  public parse(url = '/role/15_42046' ): Promise<any> {
     return new Promise((resolve) => {
-      super.get('/posts/1', {}, resolve)
+      super.get(url, {}, resolve)
     })
   }
 }

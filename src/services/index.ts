@@ -50,7 +50,7 @@ export default class BaseService implements HttpBase {
     this.http.get(`${this.ROOT_URL}${str}`, {
       params: data || {}
     }).then((res: any) => {
-      if (res.status === 200 && res.data.status === 0) {
+      if (res.status === 200 ) {
         resolve(res.data)
       } else {
         resolve(res.data || {
@@ -70,7 +70,7 @@ export default class BaseService implements HttpBase {
     }
 
     this.http.delete(`${this.ROOT_URL}${str}`, PARAMS).then((res: any) => {
-      if (res.status === 200 && res.data.status === 0) {
+      if (res.status === 200 ) {
         resolve(res.data)
       } else {
         resolve(res.data || {
@@ -96,7 +96,7 @@ export default class BaseService implements HttpBase {
 
   public post (str: string, data: object, resolve: any, headers: any = {}): void {
     this.http.post(`${this.ROOT_URL}${str}`, data, headers).then((res: any) => {
-      if (res.status === 200 && res.data.status === 0) {
+      if (res.status === 200 ) {
         resolve(res.data)
       } else {
         resolve(res.data || {
