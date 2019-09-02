@@ -27,11 +27,7 @@ export class ParserController {
 
   // 角色信息
   private character ($: any): any {
-    const entity: any = {
-      equipment : {
-        equips: []
-      }
-    }
+    const entity: Character = new Character()
     const $character = $('#equipments .equip-box')
     // 装备信息
     $character
@@ -41,24 +37,18 @@ export class ParserController {
         const $ele = $(ele)
 
         // 装备详情抽取
-        const detail = {
-          name: '',
-          type: '',
-          attr: ''
-        }
         const $detail = $ele.find('.dBox_tc_equip div')
-        detail.name = $detail.find('h3').text()
-        detail.type = $detail.find('.eq_type').text()
-        detail.attr = this.decoder.decode(
-          $detail.find('[name=equip_desc]').attr('tx3text')
+        const detail = new Equipment(
+          $detail.find('h3').text(),
+          $detail.find('.eq_type').text(),
+          $ele.find('img').attr('src'),
+          this.decoder.decode(
+            $detail.find('[name=equip_desc]').attr('tx3text')
+          )
         )
-        
 
-        entity.equipment.equips.push(
-          {
-            img: $ele.find('img').attr('src'),
-            detail: detail
-          }
+        entity.equipments.push(
+          detail
         )
         // 属性信息
         // $character('.dEquip_2 .dEquips')
@@ -66,3 +56,45 @@ export class ParserController {
     return entity
   }
 }
+
+class Character {
+  public equipments: Equipment[]
+  public attributes: Attribute[]
+  public summary: CharacterSummary
+
+  constructor (equipments: Equipment[] = [], attributes: Attribute[] = [], summary: CharacterSummary = null ) {
+    [
+      this.equipments,
+      this.attributes,
+      this.summary
+    ] = [
+      equipments,
+      attributes,
+      summary
+    ]
+  }
+}
+
+class Equipment {
+  public name: string
+  public type: string
+  public img: string
+  public attr: string
+
+  constructor (name: string = '', type: string = '', img: string = '', attr: string = '') {
+    [
+      this.name,
+      this.type,
+      this.img,
+      this.attr
+    ] = [
+      name,
+      type,
+      img,
+      attr
+    ]
+  }
+}
+
+class Attribute {}
+class CharacterSummary {}
