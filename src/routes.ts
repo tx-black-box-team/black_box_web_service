@@ -1,6 +1,7 @@
 import { ClassKeys } from './decorators'
 import { UserController } from './controller/UserController'
 import { FileController } from './controller/FileController'
+import { ParserController } from './controller/ParserController'
 
 type Controller = InstanceType<any>
 
@@ -30,4 +31,8 @@ function getRouter (controllers: Controller[]): any {
     return routers
 }
 
-export const Routers = getRouter([UserController, FileController])
+export const Routers = getRouter([
+  UserController,
+  FileController,
+  ParserController
+])

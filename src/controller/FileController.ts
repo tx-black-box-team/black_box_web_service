@@ -7,7 +7,6 @@ export class FileController {
   @Get('/bg.jpeg')
   public async getBackground (request: Request, response: Response, next: NextFunction) {
     const str: string = request.query.img
-    console.log(str)
     const path = `src/file//bg/${str}`
     const img = await new Promise((resolve) => {
       fs.readFile(path, {}, (err, data) => {
