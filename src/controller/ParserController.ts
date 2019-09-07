@@ -4,7 +4,7 @@ import ParserService from '../services/parser'
 import * as cheerio from 'cheerio'
 import { XmlEntities } from 'html-entities'
 
-@Controller('/parse')
+@Controller('/local/parse')
 export class ParserController {
   private parserService: ParserService
   private decoder: XmlEntities
@@ -16,7 +16,9 @@ export class ParserController {
 
   @Get('/base')
   public async getBackground (request: Request, response: Response, next: NextFunction) {
-    const ret: string = <string> await this.parserService.parse()
+    console.log(request)
+    const role_id = request.query.role_id
+    const ret: string = <string> await this.parserService.parse(role_id)
     const filter_str = ret.replace(/\t/g, '')
       .replace(/\n/g, '')
       .replace(/<script(.*)>.*<\/script>/g,'')
