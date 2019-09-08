@@ -49,6 +49,36 @@ export class ParserController {
           )
         )
 
+        let attrs: any = detail.attr.split('#r')
+        attrs.length > 1 &&
+        (
+          attrs = attrs.reduce((acc, item, idx) => {
+            let key = 'base'
+            acc['base'] || (acc['base'] = [])
+            let value = item.toString()
+            let res = {}
+            let val = ''
+            const reg = /#[a-zA-Z0-9]+/g
+
+            idx < attrs.length - 2 && (
+              (value = value.replace(reg, '')) &&
+              (res['base'] = [...acc['base'], value])
+            ) ||
+            idx >= attrs.length - 2 && (
+              ( value = value.replace(/#c888888/g, '') ) &&
+              (res['base'] = [...acc['base'], value])
+            )
+            
+            return {
+              ...acc,
+              ...res
+            }
+          }, [])
+        )
+        detail.attr = attrs
+        
+        detail.attr = attrs
+
         entity.equipments.push(
           detail
         )
@@ -83,7 +113,7 @@ class Equipment {
   public img: string
   public attr: string
 
-  constructor (name: string = '', type: string = '', img: string = '', attr: string = '') {
+  constructor (name: string = '', type: string = '', img: string = '', attr: any = '') {
     [
       this.name,
       this.type,
