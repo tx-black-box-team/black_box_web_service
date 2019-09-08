@@ -2,12 +2,14 @@ import {NextFunction, Request, Response} from 'express'
 import { Controller, Get, Post, Delete} from '../decorators'
 import ParserService from '../services/parser'
 import * as cheerio from 'cheerio'
+import _ from 'loadsh'
 import { XmlEntities } from 'html-entities'
 
 @Controller('/local/parse')
 export class ParserController {
   private parserService: ParserService
   private decoder: XmlEntities
+  private reg: RegExp = /#[a-zA-Z0-9]+/g
 
   constructor () {
     this.parserService = new ParserService()
@@ -16,7 +18,6 @@ export class ParserController {
 
   @Get('/base')
   public async getBackground (request: Request, response: Response, next: NextFunction) {
-    console.log(request)
     const role_id = request.query.role_id
     const ret: string = <string> await this.parserService.parse(role_id)
     const filter_str = ret.replace(/\t/g, '')
@@ -25,6 +26,76 @@ export class ParserController {
       .replace(/>\s+</g, "><")
     const $ = cheerio.load(filter_str)
     return this.character($)
+  }
+
+  public field_parse_block (res) {
+    let result: string[] = []
+
+    result = res.reduce((acc, item) => {
+      return [...acc, ...item.toString().trim().split(' ')]
+    }, []).filter(item => item)
+
+    return result
+  }
+
+  public field_parse_colon (res) {
+    let result: string | string[] | object= ''
+
+    result = res.reduce((acc, item) => {
+      let field: string | string[] | object = {}
+      let key = 'base'
+      acc['base'] || (acc['base'] = [])
+      let base_list: string[] | object = {}
+      let feild_whole = {}
+
+      item.indexOf('：') > -1 &&
+      (
+        field = item.split('：').filter(item => item.trim()) &&
+        (
+          (field as string[]).length > 1 && (
+            (
+              feild_whole = {
+                [field[0].replace(this.reg, '')]: field[1].replace(this.reg, '')
+              }
+            )
+          ) ||
+          (
+            base_list[key] = [...acc[key], item.replace(this.reg, '')].filter(item => item)
+          )
+        )
+      ) ||
+      item.indexOf(':') > -1 &&
+      (
+        field = item.split(':').filter(item => item.trim()) &&
+        (field as string[]).length > 1 && (
+          (
+            feild_whole = {
+              [field[0].replace(this.reg, '')]: field[1].replace(this.reg, '')
+            }
+          )
+        ) ||
+        (
+          base_list[key] = [...acc[key], item.replace(this.reg, '')].filter(item => item)
+        )
+      ) ||
+      (
+        item.indexOf('年') > -1 &&
+        (
+          base_list[key] = [...acc[key], item.replace(/#c888888/g, '')].filter(item => item)
+        ) ||
+        (
+          base_list[key] = [...acc[key], item.replace(this.reg, '')].filter(item => item)
+        )
+      )
+
+      return {
+        ...acc,
+        ...base_list,
+        ...feild_whole
+      }
+    }, [])
+
+    return result
   }
 
   // 角色信息
@@ -52,30 +123,8 @@ export class ParserController {
         let attrs: any = detail.attr.split('#r')
         attrs.length > 1 &&
         (
-          attrs = attrs.reduce((acc, item, idx) => {
-            let key = 'base'
-            acc['base'] || (acc['base'] = [])
-            let value = item.toString()
-            let res = {}
-            let val = ''
-            const reg = /#[a-zA-Z0-9]+/g
-
-            idx < attrs.length - 2 && (
-              (value = value.replace(reg, '')) &&
-              (res['base'] = [...acc['base'], value])
-            ) ||
-            idx >= attrs.length - 2 && (
-              ( value = value.replace(/#c888888/g, '') ) &&
-              (res['base'] = [...acc['base'], value])
-            )
-            
-            return {
-              ...acc,
-              ...res
-            }
-          }, [])
+          (attrs = this.field_parse_colon(this.field_parse_block(attrs)))
         )
-        detail.attr = attrs
         
         detail.attr = attrs
 
