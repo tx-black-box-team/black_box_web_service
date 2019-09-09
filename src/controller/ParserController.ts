@@ -2,7 +2,7 @@ import {NextFunction, Request, Response} from 'express'
 import { Controller, Get, Post, Delete} from '../decorators'
 import ParserService from '../services/parser'
 import * as cheerio from 'cheerio'
-import _ from 'loadsh'
+import equipment from '../services/parser/equipment'
 import { XmlEntities } from 'html-entities'
 
 @Controller('/local/parse')
@@ -28,76 +28,6 @@ export class ParserController {
     return this.character($)
   }
 
-  public field_parse_block (res) {
-    let result: string[] = []
-
-    result = res.reduce((acc, item) => {
-      return [...acc, ...item.toString().trim().split(' ')]
-    }, []).filter(item => item)
-
-    return result
-  }
-
-  public field_parse_colon (res) {
-    let result: string | string[] | object= ''
-
-    result = res.reduce((acc, item) => {
-      let field: string | string[] | object = {}
-      let key = 'base'
-      acc['base'] || (acc['base'] = [])
-      let base_list: string[] | object = {}
-      let feild_whole = {}
-
-      item.indexOf('：') > -1 &&
-      (
-        field = item.split('：').filter(item => item.trim()) &&
-        (
-          (field as string[]).length > 1 && (
-            (
-              feild_whole = {
-                [field[0].replace(this.reg, '')]: field[1].replace(this.reg, '')
-              }
-            )
-          ) ||
-          (
-            base_list[key] = [...acc[key], item.replace(this.reg, '')].filter(item => item)
-          )
-        )
-      ) ||
-      item.indexOf(':') > -1 &&
-      (
-        field = item.split(':').filter(item => item.trim()) &&
-        (field as string[]).length > 1 && (
-          (
-            feild_whole = {
-              [field[0].replace(this.reg, '')]: field[1].replace(this.reg, '')
-            }
-          )
-        ) ||
-        (
-          base_list[key] = [...acc[key], item.replace(this.reg, '')].filter(item => item)
-        )
-      ) ||
-      (
-        item.indexOf('年') > -1 &&
-        (
-          base_list[key] = [...acc[key], item.replace(/#c888888/g, '')].filter(item => item)
-        ) ||
-        (
-          base_list[key] = [...acc[key], item.replace(this.reg, '')].filter(item => item)
-        )
-      )
-
-      return {
-        ...acc,
-        ...base_list,
-        ...feild_whole
-      }
-    }, [])
-
-    return result
-  }
-
   // 角色信息
   private character ($: any): any {
     const entity: Character = new Character()
@@ -121,10 +51,12 @@ export class ParserController {
         )
 
         let attrs: any = detail.attr.split('#r')
-        attrs.length > 1 &&
-        (
-          (attrs = this.field_parse_colon(this.field_parse_block(attrs)))
-        )
+
+        if (attrs.length > 1) {
+          attrs = equipment.reg_field(attrs)
+          // attrs = equipment.field_parse_block(attrs)
+          // attrs = equipment.field_parse_colon(attrs)
+        }
         
         detail.attr = attrs
 
