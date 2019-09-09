@@ -9,7 +9,6 @@ import { XmlEntities } from 'html-entities'
 export class ParserController {
   private parserService: ParserService
   private decoder: XmlEntities
-  private reg: RegExp = /#[a-zA-Z0-9]+/g
 
   constructor () {
     this.parserService = new ParserService()
@@ -26,76 +25,6 @@ export class ParserController {
       .replace(/>\s+</g, "><")
     const $ = cheerio.load(filter_str)
     return this.character($)
-  }
-
-  public field_parse_block (res) {
-    let result: string[] = []
-
-    result = res.reduce((acc, item) => {
-      return [...acc, ...item.toString().trim().split(' ')]
-    }, []).filter(item => item)
-
-    return result
-  }
-
-  public field_parse_colon (res) {
-    let result: string | string[] | object= ''
-
-    result = res.reduce((acc, item) => {
-      let field: string | string[] | object = {}
-      let key = 'base'
-      acc['base'] || (acc['base'] = [])
-      let base_list: string[] | object = {}
-      let feild_whole = {}
-
-      item.indexOf('：') > -1 &&
-      (
-        field = item.split('：').filter(item => item.trim()) &&
-        (
-          (field as string[]).length > 1 && (
-            (
-              feild_whole = {
-                [field[0].replace(this.reg, '')]: field[1].replace(this.reg, '')
-              }
-            )
-          ) ||
-          (
-            base_list[key] = [...acc[key], item.replace(this.reg, '')].filter(item => item)
-          )
-        )
-      ) ||
-      item.indexOf(':') > -1 &&
-      (
-        field = item.split(':').filter(item => item.trim()) &&
-        (field as string[]).length > 1 && (
-          (
-            feild_whole = {
-              [field[0].replace(this.reg, '')]: field[1].replace(this.reg, '')
-            }
-          )
-        ) ||
-        (
-          base_list[key] = [...acc[key], item.replace(this.reg, '')].filter(item => item)
-        )
-      ) ||
-      (
-        item.indexOf('年') > -1 &&
-        (
-          base_list[key] = [...acc[key], item.replace(/#c888888/g, '')].filter(item => item)
-        ) ||
-        (
-          base_list[key] = [...acc[key], item.replace(this.reg, '')].filter(item => item)
-        )
-      )
-
-      return {
-        ...acc,
-        ...base_list,
-        ...feild_whole
-      }
-    }, [])
-
-    return result
   }
 
   // 角色信息
@@ -119,14 +48,7 @@ export class ParserController {
             $detail.find('[name=equip_desc]').attr('tx3text')
           )
         )
-
-        let attrs: any = detail.attr.split('#r')
-        attrs.length > 1 &&
-        (
-          (attrs = this.field_parse_colon(this.field_parse_block(attrs)))
-        )
-        
-        detail.attr = attrs
+        detail.parseAttr()
 
         entity.equipments.push(
           detail
@@ -161,19 +83,93 @@ class Equipment {
   public type: string
   public img: string
   public attr: string
+  private isParsed: boolean
+  private reg: RegExp = /#[a-zA-Z0-9]+/g
 
   constructor (name: string = '', type: string = '', img: string = '', attr: any = '') {
     [
       this.name,
       this.type,
       this.img,
-      this.attr
+      this.attr,
+      this.isParsed,
     ] = [
       name,
       type,
       img,
-      attr
+      attr,
+      false
     ]
+  }
+
+  public parseAttr () {
+    if (!this.isParsed) {
+      let attrs: any =  this.attr.split('#r')
+      attrs.length > 1 &&
+      (
+        (attrs = this.field_parse_colon(this.field_parse_block(attrs)))
+      )
+      this.attr = attrs
+    }
+
+    this.isParsed = true
+    return this.attr
+
+  }
+
+  private field_parse_block (res: any) {
+    let result: string[] = []
+
+    result = res.reduce((acc, item) => {
+      return [...acc, ...item.toString().trim().split(' ')]
+    }, []).filter((item: any) => item)
+
+    return result
+  }
+
+  private field_parse_colon (res: any) {
+    let result: string | string[] | object= ''
+
+    result = res.reduce((acc: any, item: any) => {
+      let field: string | string[] | object = {}
+      const _item = item.replace('：', ':')
+      let key = 'base'
+      acc[key] || (acc[key] = [])
+      let base_list: string[] | object = {}
+      let feild_whole = {}
+
+      _item.indexOf(':') > -1 &&
+      (
+        field = _item.split(':').filter(_item => _item.trim()) &&
+        (field as string[]).length > 1 && (
+          (
+            feild_whole = {
+              [field[0].replace(this.reg, '')]: field[1].replace(this.reg, '')
+            }
+          )
+        ) ||
+        (
+          base_list[key] = [...acc[key], _item.replace(this.reg, '')].filter(item => item)
+        )
+      ) ||
+      (
+        _item.indexOf('年') > -1 &&
+        (
+          base_list[key] = [...acc[key], _item.replace(/#c888888/g, '')].filter(item => item)
+        ) ||
+        (
+          base_list[key] = [...acc[key], _item.replace(this.reg, '')].filter(item => item)
+        )
+      )
+
+      return {
+        ...acc,
+        ...base_list,
+        ...feild_whole
+      }
+    }, [])
+
+    return result
   }
 }
 
