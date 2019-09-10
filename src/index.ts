@@ -7,6 +7,7 @@ import {Routers} from './routes'
 const app = express()
 
 app.use(bodyParser.json())
+
 app.use(require('morgan')('dev'))
 
 // register express routes from defined application routes
@@ -22,6 +23,7 @@ Routers.forEach(route => {
 		}
 	})
 })
+
 
 	// setup express app here
 	// ...
