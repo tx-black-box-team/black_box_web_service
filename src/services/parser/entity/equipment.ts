@@ -51,7 +51,6 @@ export default class Equipment {
   public reg_field (res: string[]) {
     return res.reduce((acc: any, cur: string) => {
       let filed: any = {}
-      console.log(cur)
       Object.keys(equipment_reg).map((item: string) => {
         const reg: RegExp = equipment_reg[item]
         if (reg.test(cur)) {
