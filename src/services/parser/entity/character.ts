@@ -4,17 +4,17 @@ import { XmlEntities } from 'html-entities'
 
 export default class Character {
   public equipments: Equipment[]
-  public attributes: Attribute[]
+  public attribute: Attribute | any
   public summary: CharacterSummary
 
-  constructor (equipments: Equipment[] = [], attributes: Attribute[] = [], summary: CharacterSummary = null ) {
+  constructor (equipments: Equipment[] = [], attribute: Attribute = new Attribute(), summary: CharacterSummary = null ) {
     [
       this.equipments,
-      this.attributes,
+      this.attribute,
       this.summary
     ] = [
       equipments,
-      attributes,
+      attribute,
       summary
     ]
   }
@@ -46,9 +46,16 @@ export default class Character {
         entity.equipments.push(
           detail
         )
-        // 属性信息
-        // $character('.dEquip_2 .dEquips')
     })
+
+    // 属性信息
+    const attribute = new Attribute()
+    attribute.parseAttr(
+      decoder.decode(
+        $character.find('.dEquip_2').html()
+      )
+    )
+    entity.attribute = attribute
     return entity
   }
 }

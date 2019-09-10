@@ -6,6 +6,38 @@ export default class Util {
 
   public static word: string[] = []
 
+  public static ALPHA_INDEX = {
+    '&lt': '<',
+    '&gt': '>',
+    '&quot': '"',
+    '&apos': '\'',
+    '&amp': '&',
+    '&lt;': '<',
+    '&gt;': '>',
+    '&quot;': '"',
+    '&apos;': '\'',
+    '&amp;': '&'
+  }
+
+  public static decodeXML = (str: string): string  => {
+    if (!str || !str.length) {
+        return ''
+    }
+    return str.replace(/&#?[0-9a-zA-Z]+;?/g, function(s) {
+        if (s.charAt(1) === '#') {
+            var code = s.charAt(2).toLowerCase() === 'x' ?
+                parseInt(s.substr(3), 16) :
+                parseInt(s.substr(2));
+
+            if (isNaN(code) || code < -32768 || code > 65535) {
+                return '';
+            }
+            return String.fromCharCode(code);
+        }
+        return Util.ALPHA_INDEX[s] || s;
+    });
+  };
+
   public static response_manage (
     promise: Promise<any>,
     success: Function,
