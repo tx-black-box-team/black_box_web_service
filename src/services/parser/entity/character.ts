@@ -1,21 +1,30 @@
 import Equipment from './equipment'
 import Attribute from './attribute'
+import Base from './base'
 import { XmlEntities } from 'html-entities'
 
 export default class Character {
   public equipments: Equipment[]
   public attribute: Attribute | any
   public summary: CharacterSummary
+  public base: Base
 
-  constructor (equipments: Equipment[] = [], attribute: Attribute = new Attribute(), summary: CharacterSummary = null ) {
+  constructor (
+    equipments: Equipment[] = [],
+    attribute: Attribute = new Attribute(),
+    summary: CharacterSummary = null,
+    base: Base = new Base()
+  ) {
     [
       this.equipments,
       this.attribute,
-      this.summary
+      this.summary,
+      this.base
     ] = [
       equipments,
       attribute,
-      summary
+      summary,
+      base
     ]
   }
 
@@ -27,8 +36,9 @@ export default class Character {
       .find('.dEquip_1 .dEquips>div')
       .not('style[visibility=hidden]')
       .each((ind: number, ele: any) => {
-        const $ele = $(ele)
+        const $ele: any = $(ele)
 
+        
         // 装备详情抽取
         const $detail = $ele.find('.dBox_tc_equip div')
         if ($detail.find('h3').text().trim() === '' ) return 
@@ -39,13 +49,13 @@ export default class Character {
           $ele.find('img').attr('src'),
           decoder.decode(
             $detail.find('[name=equip_desc]').attr('tx3text')
-          )
+          ),
+          $ele.attr('id'),
+          $ele.find('a').attr('class')
         )
         detail.parseAttr()
 
-        entity.equipments.push(
-          detail
-        )
+        entity.equipments.push(detail)
     })
 
     // 属性信息
@@ -56,6 +66,15 @@ export default class Character {
       )
     )
     entity.attribute = attribute
+
+    const base = new Base()
+    base.parseAttr(
+      decoder.decode(
+        $('.dMain').html()
+      )
+    )
+
+    entity.base = base
     return entity
   }
 }

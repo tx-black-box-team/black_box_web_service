@@ -7,6 +7,7 @@ build/
 tmp/
 temp/
 .DS_Store
+.history
 
 ormconfig.json
 

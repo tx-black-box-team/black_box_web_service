@@ -8,21 +8,28 @@ export default class Equipment {
   public img: string
   public attr: string
   public html: string
+  public id: string
+  public level_str: string
   private isParsed: boolean
 
-  constructor (name: string = '', type: string = '', img: string = '', attr: any = '') {
+
+  constructor (name: string = '', type: string = '', img: string = '', attr: any = '', id: string= '', level_str: string = '') {
     [
       this.name,
       this.type,
       this.img,
       this.attr,
       this.isParsed,
+      this.id,
+      this.level_str
     ] = [
       name,
       type,
       img,
       attr,
-      false
+      false,
+      id,
+      level_str
     ]
   }
 

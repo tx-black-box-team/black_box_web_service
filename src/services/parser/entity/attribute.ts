@@ -32,7 +32,7 @@ export default class Attribute {
     const $attack = $attrs.find('.ulList_5.ulList_h li')
     const attack = this._extractAttr($, $attack)
 
-    // // 防御属性
+    // 防御属性
     const $defend = $attrs.find('.ulList_6.ulList_h li')
     const defend = this._extractAttr($, $defend)
 
