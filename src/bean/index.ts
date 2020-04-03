@@ -7,7 +7,7 @@ const account: {
   template_code: string,
   template_params: Function
 } = {
-  msg_id: 'LTAIvnDFlCG6YfGc',
+  msg_id: '',
   msg_app_secret: '',
   endpoint: 'https://dysmsapi.aliyuncs.com',
   api_version: '2017-05-25',
